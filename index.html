@@ -566,7 +566,7 @@
 
 
   .center-energy-board {
-    max-width: 760px;
+    max-width: 720px;
     margin: 0 auto;
   }
 
@@ -580,26 +580,17 @@
   }
 
   .large-energy-grid .energy-block.active {
-    transform: scale(1.015);
+    transform: scale(1.01);
     box-shadow: 0 24px 60px -35px rgba(14,14,12,.65);
   }
 
-  .branch-pill.energy-match {
-    background: var(--ink);
-    color: var(--paper);
-    border-color: var(--ink);
+  .branch-pill.energy-suggested {
+    border-color: var(--accent);
   }
 
-  .branch-pill.energy-match .num {
+  .branch-pill.energy-suggested .num {
     color: var(--accent);
   }
-
-  .branch-pill.active:not(.energy-match) {
-    background: transparent;
-    color: var(--ink-2);
-    border-color: var(--line);
-  }
-
 
   .assign-row {
     display: flex;
@@ -632,13 +623,6 @@
     color: var(--muted);
     line-height: 1.35;
     margin: .7rem 0 0;
-  }
-
-  .auto-note {
-    font-size: .78rem;
-    color: var(--muted);
-    line-height: 1.4;
-    margin-top: .75rem;
   }
 
   /* ENERGY BOARD */
@@ -1047,7 +1031,7 @@
         <div>
           <div class="sec-head">
             <span class="sec-title">The Map</span>
-            <span class="sec-num"><strong>02</strong> &mdash; six branches</span>
+            <span class="sec-num"><strong>02</strong> &mdash; work + life branches</span>
           </div>
           <div class="rule"></div>
           <div class="branch-nav" id="branchNav"></div>
@@ -1064,7 +1048,7 @@
             <input class="add-input" id="inboxInput" placeholder="Capture a task to sort later..." />
             <button class="add-go" id="inboxBtn">Add</button>
           </div>
-          <div class="inbox-capture-note">Use this for anything that pops up. Sort it during the 3:30–4:30 processing block.</div>
+          <div class="inbox-capture-note">Use this for anything that pops up. Then sort it when you choose Processing.</div>
         </div>
 
         <div class="today-area">
@@ -1081,7 +1065,7 @@
         <div class="energy-board center-energy-board">
           <div class="sec-head">
             <span class="sec-title">Energy Board</span>
-            <span class="sec-num"><strong>03</strong> &mdash; right work / right time</span>
+            <span class="sec-num"><strong>03</strong> &mdash; guidance only</span>
           </div>
           <div class="rule"></div>
           <div class="energy-grid large-energy-grid" id="energyGrid"></div>
@@ -1093,7 +1077,7 @@
         <div class="tasks-wrap">
           <div class="sec-head">
             <span class="sec-title" id="tasksLabel">Tasks</span>
-            <span class="sec-num"><strong>04</strong> &mdash; auto-filtered by energy</span>
+            <span class="sec-num"><strong>03</strong> &mdash; small &amp; finishable</span>
           </div>
           <div class="rule"></div>
           <div class="suggestions" id="taskSuggestions"></div>
@@ -1108,12 +1092,10 @@
             <div class="key-item"><div class="key-dot" style="background:var(--ink)"></div>Medium</div>
             <div class="key-item"><div class="key-dot"></div>Easy</div>
           </div>
-        </div>
-
-        <div class="timeline-wrap">
+        </div><div class="timeline-wrap">
           <div class="sec-head">
             <span class="sec-title">Timeline</span>
-            <span class="sec-num"><strong>05</strong> &mdash; dated tasks</span>
+            <span class="sec-num"><strong>06</strong> &mdash; dated tasks</span>
           </div>
           <div class="rule"></div>
           <div class="timeline-toolbar">
@@ -1177,7 +1159,7 @@ const BRANCHES = [
 ];
 
 const BRANCH_HINTS = {
-  inbox: 'Quick capture: park random tasks here and assign them during processing.',
+  inbox: 'Quick capture: unassigned tasks you can sort later during processing.',
   technical: 'Deep review work: RFIs, submittals, code, details, drawings.',
   coordination: 'Move the project: emails, meetings, consultant follow-ups, client decisions.',
   processing: 'Low-energy admin: logging, downloading, filing, trackers, uploads.',
@@ -1191,12 +1173,7 @@ const ENERGY_CYCLE = ['mid', 'deep', 'easy'];
 
 
 const TASK_SUGGESTIONS = {
-  inbox: [
-    'New task to sort',
-    'Follow-up to categorize',
-    'Random item from today',
-    'Needs review later'
-  ],
+  inbox: ['New task to sort', 'Follow-up to categorize', 'Random item from today', 'Needs review later'],
   technical: [
     'Review RFI response',
     'Review submittal',
@@ -1254,13 +1231,12 @@ function renderSuggestions() {
   const wrap = document.getElementById('taskSuggestions');
   if (!wrap) return;
 
-  const activeBranch = getPrimaryEnergyBranchId() || state.selected;
-  if (!activeBranch) {
+  if (!state.selected) {
     wrap.innerHTML = '';
     return;
   }
 
-  const suggestions = TASK_SUGGESTIONS[activeBranch] || [];
+  const suggestions = TASK_SUGGESTIONS[state.selected] || [];
   wrap.innerHTML = suggestions.map(s => '<button class="suggestion" type="button">' + escapeHtml(s) + '</button>').join('');
   wrap.querySelectorAll('.suggestion').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1317,7 +1293,7 @@ function renderBranchNav() {
   const wrap = document.getElementById('branchNav');
   wrap.innerHTML = BRANCHES.map(b => {
     const tasks = state.tasks[b.id] || [];
-    const energyMatch = getEnergyBranchIds().includes(b.id);
+    const energySuggested = getEnergyBranchIds().includes(b.id);
     const active = state.selected === b.id;
     return '<button class="branch-pill ' + (active ? 'active' : '') + ' ' + (tasks.length ? 'has-tasks' : '') + '" data-id="' + b.id + '">' +
       '<span class="dot"></span>' +
@@ -1335,135 +1311,42 @@ function renderBranchNav() {
 }
 
 function renderComposition() {
-  const blackHead = document.getElementById('blackHeadline');
-  const blackMeta = document.getElementById('blackMeta');
-  const whiteHead = document.getElementById('whiteHeadline');
-  const whiteMeta = document.getElementById('whiteMeta');
-  const pager = document.getElementById('pagerCur');
-
-  if (!state.selected) {
-    blackHead.innerHTML = '<strong>Tap a branch</strong> above to begin shaping your week.';
-    blackMeta.textContent = '\u2014 \u2014';
-    whiteHead.innerHTML = 'Each branch holds a few small tasks. Keep them <strong>finishable.</strong>';
-    whiteMeta.textContent = '\u2014 \u2014';
-    pager.textContent = '01';
-    return;
-  }
-
-  const branch = BRANCHES.find(b => b.id === state.selected);
-  const tasks = state.tasks[branch.id] || [];
-  const open = tasks.filter(t => !t.done);
-  const done = tasks.filter(t => t.done);
-  pager.textContent = branch.num;
-
-  let blackMsg;
-  if (open.length === 0 && tasks.length === 0) {
-    blackMsg = 'no tasks yet. add a few small, finishable items below.';
-  } else if (open.length === 0) {
-    blackMsg = 'all tasks complete. nice work.';
-  } else {
-    blackMsg = open.length + ' ' + (open.length === 1 ? 'task' : 'tasks') + ' on your plate this week.';
-  }
-  blackHead.innerHTML = '<strong>' + branch.label + '</strong> &mdash; ' + blackMsg + '<br><br><span style="opacity:.72">' + escapeHtml(BRANCH_HINTS[branch.id] || '') + '</span>';
-  blackMeta.textContent = 'Branch ' + branch.num + ' / 06';
-
-  if (tasks.length === 0) {
-    whiteHead.innerHTML = 'Add tasks below \u2014 they\u2019ll appear <strong>here</strong> as a snapshot.';
-    whiteMeta.textContent = '0 tasks \u00b7 0 done';
-  } else {
-    const previews = open.slice(0, 2).map(t => t.text);
-    if (previews.length === 0) {
-      whiteHead.innerHTML = '<strong>All clear.</strong> Everything in this branch is done.';
-    } else if (previews.length === 1) {
-      whiteHead.innerHTML = '<strong>' + escapeHtml(previews[0]) + '.</strong>';
-    } else {
-      whiteHead.innerHTML = '<strong>' + escapeHtml(previews[0]) + '.</strong> Then ' + escapeHtml(previews[1].toLowerCase()) + '.';
-    }
-    whiteMeta.textContent = tasks.length + ' ' + (tasks.length === 1 ? 'task' : 'tasks') + ' \u00b7 ' + done.length + ' done';
-  }
+  // Bubbles removed in this manual energy-guide version.
 }
-
-
-function addInboxTask() {
-  const input = document.getElementById('inboxInput');
-  if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
-
-  if (!state.tasks.inbox) state.tasks.inbox = [];
-  state.tasks.inbox.unshift({
-    id: 't' + Date.now() + Math.random().toString(36).slice(2,5),
-    text: text,
-    energy: 'mid',
-    done: false,
-    date: ''
-  });
-
-  input.value = '';
-  saveState();
-  renderAll();
-}
-
-function assignInboxTask(taskId, targetBranch) {
-  if (!state.tasks.inbox || !state.tasks[targetBranch]) return;
-  const idx = state.tasks.inbox.findIndex(t => t.id === taskId);
-  if (idx === -1) return;
-
-  const [task] = state.tasks.inbox.splice(idx, 1);
-  state.tasks[targetBranch].push(task);
-  saveState();
-  renderAll();
-}
-
-function canAssignInboxNow() {
-  const current = getCurrentEnergyBlock();
-  return current && current.branches.includes('inbox');
-}
-
 
 function renderTasks() {
   const list = document.getElementById('taskList');
   const addRow = document.getElementById('addRow');
   const label = document.getElementById('tasksLabel');
 
-  autoSelectEnergyBranch();
-
-  const branchIds = getEnergyBranchIds();
-  const primaryId = getPrimaryEnergyBranchId();
-  const branch = BRANCHES.find(b => b.id === primaryId) || BRANCHES.find(b => b.id === state.selected);
-
-  if (!branch) {
-    list.innerHTML = '<div class="empty">Buffer time. Use this for breaks, lunch, cleanup, or unscheduled items.</div>';
+  if (!state.selected) {
+    list.innerHTML = '<div class="empty">Pick a branch above to start adding tasks.</div>';
     addRow.style.display = 'none';
-    label.textContent = 'Now';
+    label.textContent = 'Tasks';
     return;
   }
 
-  label.textContent = 'Now: ' + branch.label;
+  const branch = BRANCHES.find(b => b.id === state.selected);
+  label.textContent = branch.label + ' Tasks';
   addRow.style.display = 'flex';
 
-  let tasks = [];
-  branchIds.forEach(id => {
-    const branchInfo = BRANCHES.find(b => b.id === id);
-    (state.tasks[id] || []).forEach(t => tasks.push({ ...t, branchId: id, branchLabel: branchInfo ? branchInfo.label : id }));
-  });
-
+  const tasks = state.tasks[branch.id] || [];
   if (tasks.length === 0) {
-    list.innerHTML = '<div class="empty">No tasks match this energy block yet. Add one below and it will go into ' + escapeHtml(branch.label) + '.</div>';
+    list.innerHTML = '<div class="empty">Empty. Add 1\u20133 small tasks you can finish this week.</div>';
     return;
   }
 
   list.innerHTML = tasks.map((t, i) =>
-    '<div class="task ' + (t.done ? 'done' : '') + '" data-id="' + t.id + '" data-branch="' + (t.branchId || branch.id) + '">' +
+    '<div class="task ' + (t.done ? 'done' : '') + '" data-id="' + t.id + '">' +
       '<span class="task-num">' + String(i+1).padStart(2,'0') + '</span>' +
       '<div class="energy" data-e="' + t.energy + '" data-act="energy" title="Tap to change energy"></div>' +
       '<div style="flex:1">' +
         '<div class="task-text" data-act="toggle">' + escapeHtml(t.text) + '</div>' +
         '<div class="task-tools">' +
-          '<span class="task-branch-date">' + escapeHtml(t.branchLabel || branch.label) + '</span>' + '<span class="task-branch-date">Due</span>' +
+          '<span class="task-branch-date">Due</span>' +
           '<input class="date-input" type="date" value="' + (t.date || '') + '" data-act="date" />' +
         '</div>' +
-        ((t.branchId === 'inbox' && canAssignInboxNow()) ? '<div class="assign-row">' +
+        ((state.selected === 'inbox') ? '<div class="assign-row">' +
           '<button class="assign-btn" data-act="assign" data-target="technical">Technical</button>' +
           '<button class="assign-btn" data-act="assign" data-target="coordination">Coordination</button>' +
           '<button class="assign-btn" data-act="assign" data-target="processing">Processing</button>' +
@@ -1477,12 +1360,11 @@ function renderTasks() {
 
   list.querySelectorAll('.task').forEach(el => {
     const id = el.dataset.id;
-    const branchId = el.dataset.branch;
     el.querySelectorAll('[data-act]').forEach(btn => {
       if (btn.dataset.act === 'date') {
         btn.addEventListener('change', (e) => {
           e.stopPropagation();
-          handleTaskDate(id, e.target.value, branchId);
+          handleTaskDate(id, e.target.value);
         });
         btn.addEventListener('click', (e) => e.stopPropagation());
       } else if (btn.dataset.act === 'assign') {
@@ -1493,7 +1375,7 @@ function renderTasks() {
       } else {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          handleTaskAction(id, btn.dataset.act, branchId);
+          handleTaskAction(id, btn.dataset.act);
         });
       }
     });
@@ -1501,8 +1383,8 @@ function renderTasks() {
 }
 
 
-function handleTaskDate(taskId, value, branchId) {
-  const tasks = state.tasks[branchId || state.selected];
+function handleTaskDate(taskId, value) {
+  const tasks = state.tasks[state.selected];
   const idx = tasks.findIndex(t => t.id === taskId);
   if (idx === -1) return;
   tasks[idx].date = value;
@@ -1576,7 +1458,7 @@ const ENERGY_SCHEDULE = [
     start: 15.5,
     end: 16.5,
     branches: ['processing', 'inbox'],
-    desc: 'Download files, log RFIs/submittals, update trackers, file documents, and assign inbox tasks.'
+    desc: 'Download files, log RFIs/submittals, update trackers, file documents, and sort inbox tasks.'
   },
   {
     id: 'evening-life',
@@ -1597,24 +1479,6 @@ function getCurrentDecimalHour() {
 function getCurrentEnergyBlock() {
   const hour = getCurrentDecimalHour();
   return ENERGY_SCHEDULE.find(b => hour >= b.start && hour < b.end);
-}
-
-function getEnergyBranchIds() {
-  const current = getCurrentEnergyBlock();
-  return current ? current.branches : [];
-}
-
-function getPrimaryEnergyBranchId() {
-  const ids = getEnergyBranchIds();
-  return ids.length ? ids[0] : null;
-}
-
-function autoSelectEnergyBranch() {
-  const primary = getPrimaryEnergyBranchId();
-  if (primary && state.selected !== primary) {
-    state.selected = primary;
-    saveState();
-  }
 }
 
 function getBranchLabels(ids) {
@@ -1642,12 +1506,48 @@ function renderEnergyBoard() {
   }).join('');
 
   if (current) {
-    note.innerHTML = 'Right now: <strong>' + current.label + '</strong> — tasks on the right are automatically filtered to <strong>' + escapeHtml(getBranchLabels(current.branches)) + '</strong>.';
+    note.innerHTML = 'Right now: <strong>' + current.label + '</strong> — suggested branch: <strong>' + escapeHtml(getBranchLabels(current.branches)) + '</strong>. You can still choose any branch manually.';
   } else {
     note.innerHTML = 'Right now: <strong>buffer / transition time</strong> — use this for breaks, lunch, cleanup, or unscheduled items.';
   }
 }
 
+
+
+function getEnergyBranchIds() {
+  const current = getCurrentEnergyBlock();
+  return current ? current.branches : [];
+}
+
+function addInboxTask() {
+  const input = document.getElementById('inboxInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!state.tasks.inbox) state.tasks.inbox = [];
+  state.tasks.inbox.unshift({
+    id: 't' + Date.now() + Math.random().toString(36).slice(2,5),
+    text: text,
+    energy: 'mid',
+    done: false,
+    date: ''
+  });
+
+  input.value = '';
+  saveState();
+  renderAll();
+}
+
+function assignInboxTask(taskId, targetBranch) {
+  if (!state.tasks.inbox || !state.tasks[targetBranch]) return;
+  const idx = state.tasks.inbox.findIndex(t => t.id === taskId);
+  if (idx === -1) return;
+  const [task] = state.tasks.inbox.splice(idx, 1);
+  state.tasks[targetBranch].push(task);
+  saveState();
+  renderAll();
+}
 
 function renderTimeline() {
   const wrap = document.getElementById('timelineList');
@@ -1691,8 +1591,8 @@ function renderTimeline() {
 }
 
 
-function handleTaskAction(taskId, action, branchId) {
-  const tasks = state.tasks[branchId || state.selected];
+function handleTaskAction(taskId, action) {
+  const tasks = state.tasks[state.selected];
   const idx = tasks.findIndex(t => t.id === taskId);
   if (idx === -1) return;
   if (action === 'toggle') tasks[idx].done = !tasks[idx].done;
@@ -1707,9 +1607,8 @@ function handleTaskAction(taskId, action, branchId) {
 function addTask() {
   const input = document.getElementById('addInput');
   const text = input.value.trim();
-  const targetBranch = getPrimaryEnergyBranchId() || state.selected;
-  if (!text || !targetBranch) return;
-  state.tasks[targetBranch].push({
+  if (!text || !state.selected) return;
+  state.tasks[state.selected].push({
     id: 't' + Date.now() + Math.random().toString(36).slice(2,5),
     text: text, energy: 'mid', done: false, date: '',
   });
@@ -1842,7 +1741,6 @@ function renderNotes() {
 
 
 function renderAll() {
-  autoSelectEnergyBranch();
   renderBranchNav();
   renderComposition();
   renderTasks();
@@ -1889,6 +1787,7 @@ function init() {
     renderChips();
   });
 
+  if (!state.selected) state.selected = 'inbox';
   renderAll();
   renderChips();
   renderNotes();
