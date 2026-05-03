@@ -564,6 +564,83 @@
   }
 
 
+
+  .center-energy-board {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .large-energy-grid {
+    gap: .9rem;
+  }
+
+  .large-energy-grid .energy-block {
+    padding: 1.15rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  .large-energy-grid .energy-block.active {
+    transform: scale(1.015);
+    box-shadow: 0 24px 60px -35px rgba(14,14,12,.65);
+  }
+
+  .branch-pill.energy-match {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .branch-pill.energy-match .num {
+    color: var(--accent);
+  }
+
+  .branch-pill.active:not(.energy-match) {
+    background: transparent;
+    color: var(--ink-2);
+    border-color: var(--line);
+  }
+
+
+  .assign-row {
+    display: flex;
+    gap: .45rem;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+  }
+
+  .assign-btn {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: .62rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .35rem .55rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .assign-btn:active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .inbox-capture-note {
+    font-size: .72rem;
+    color: var(--muted);
+    line-height: 1.35;
+    margin: .7rem 0 0;
+  }
+
+  .auto-note {
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.4;
+    margin-top: .75rem;
+  }
+
   /* ENERGY BOARD */
   .energy-board {
     margin-bottom: 2.4rem;
@@ -970,10 +1047,24 @@
         <div>
           <div class="sec-head">
             <span class="sec-title">The Map</span>
-            <span class="sec-num"><strong>02</strong> &mdash; work + life branches</span>
+            <span class="sec-num"><strong>02</strong> &mdash; six branches</span>
           </div>
           <div class="rule"></div>
           <div class="branch-nav" id="branchNav"></div>
+        </div>
+
+        <div class="anchor-area">
+          <div class="sec-head">
+            <span class="sec-title">Quick Inbox</span>
+            <span class="sec-num"><strong>02</strong> &mdash; unassigned</span>
+          </div>
+          <div class="rule"></div>
+          <div class="add-row" style="display:flex">
+            <span class="add-plus">+</span>
+            <input class="add-input" id="inboxInput" placeholder="Capture a task to sort later..." />
+            <button class="add-go" id="inboxBtn">Add</button>
+          </div>
+          <div class="inbox-capture-note">Use this for anything that pops up. Sort it during the 3:30–4:30 processing block.</div>
         </div>
 
         <div class="today-area">
@@ -987,21 +1078,14 @@
       </aside>
 
       <main class="dashboard-panel center-panel">
-        <div class="composition wide-composition">
-          <div class="circle circle-black">
-            <div class="circle-label">Active branch</div>
-            <div class="circle-headline" id="blackHeadline">
-              <strong>Tap a branch</strong> above to begin shaping your week.
-            </div>
-            <div class="circle-meta" id="blackMeta">&mdash; &mdash;</div>
+        <div class="energy-board center-energy-board">
+          <div class="sec-head">
+            <span class="sec-title">Energy Board</span>
+            <span class="sec-num"><strong>03</strong> &mdash; right work / right time</span>
           </div>
-          <div class="circle circle-white">
-            <div class="circle-label">Top tasks</div>
-            <div class="circle-headline" id="whiteHeadline">
-              Each branch holds a few small tasks. Keep them <strong>finishable.</strong>
-            </div>
-            <div class="circle-meta" id="whiteMeta">&mdash; &mdash;</div>
-          </div>
+          <div class="rule"></div>
+          <div class="energy-grid large-energy-grid" id="energyGrid"></div>
+          <div class="energy-now" id="energyNow"></div>
         </div>
       </main>
 
@@ -1009,7 +1093,7 @@
         <div class="tasks-wrap">
           <div class="sec-head">
             <span class="sec-title" id="tasksLabel">Tasks</span>
-            <span class="sec-num"><strong>03</strong> &mdash; small &amp; finishable</span>
+            <span class="sec-num"><strong>04</strong> &mdash; auto-filtered by energy</span>
           </div>
           <div class="rule"></div>
           <div class="suggestions" id="taskSuggestions"></div>
@@ -1026,20 +1110,10 @@
           </div>
         </div>
 
-        <div class="energy-board">
-          <div class="sec-head">
-            <span class="sec-title">Energy Board</span>
-            <span class="sec-num"><strong>05</strong> &mdash; work by energy</span>
-          </div>
-          <div class="rule"></div>
-          <div class="energy-grid" id="energyGrid"></div>
-          <div class="energy-now" id="energyNow"></div>
-        </div>
-
         <div class="timeline-wrap">
           <div class="sec-head">
             <span class="sec-title">Timeline</span>
-            <span class="sec-num"><strong>06</strong> &mdash; dated tasks</span>
+            <span class="sec-num"><strong>05</strong> &mdash; dated tasks</span>
           </div>
           <div class="rule"></div>
           <div class="timeline-toolbar">
@@ -1094,15 +1168,16 @@
 
 <script>
 const BRANCHES = [
-  { id: 'technical',    num: '01', label: 'Technical' },
-  { id: 'coordination', num: '02', label: 'Coordination' },
-  { id: 'processing',   num: '03', label: 'Processing' },
-  { id: 'practice',     num: '04', label: 'Practice' },
-  { id: 'body',         num: '05', label: 'Body' },
+  { id: 'inbox',        num: '01', label: 'Inbox' },
+  { id: 'technical',    num: '02', label: 'Technical' },
+  { id: 'coordination', num: '03', label: 'Coordination' },
+  { id: 'processing',   num: '04', label: 'Processing' },
+  { id: 'practice',     num: '05', label: 'Practice' },
   { id: 'life',         num: '06', label: 'Life' },
 ];
 
 const BRANCH_HINTS = {
+  inbox: 'Quick capture: park random tasks here and assign them during processing.',
   technical: 'Deep review work: RFIs, submittals, code, details, drawings.',
   coordination: 'Move the project: emails, meetings, consultant follow-ups, client decisions.',
   processing: 'Low-energy admin: logging, downloading, filing, trackers, uploads.',
@@ -1116,6 +1191,12 @@ const ENERGY_CYCLE = ['mid', 'deep', 'easy'];
 
 
 const TASK_SUGGESTIONS = {
+  inbox: [
+    'New task to sort',
+    'Follow-up to categorize',
+    'Random item from today',
+    'Needs review later'
+  ],
   technical: [
     'Review RFI response',
     'Review submittal',
@@ -1139,12 +1220,6 @@ const TASK_SUGGESTIONS = {
     'Send invoice',
     'Update template',
     'Brand / website task'
-  ],
-  body: [
-    '30 min workout',
-    'Stretch 10 min',
-    'Walk outside',
-    'Mobility reset'
   ],
   life: [
     'Family time',
@@ -1179,12 +1254,13 @@ function renderSuggestions() {
   const wrap = document.getElementById('taskSuggestions');
   if (!wrap) return;
 
-  if (!state.selected) {
+  const activeBranch = getPrimaryEnergyBranchId() || state.selected;
+  if (!activeBranch) {
     wrap.innerHTML = '';
     return;
   }
 
-  const suggestions = TASK_SUGGESTIONS[state.selected] || [];
+  const suggestions = TASK_SUGGESTIONS[activeBranch] || [];
   wrap.innerHTML = suggestions.map(s => '<button class="suggestion" type="button">' + escapeHtml(s) + '</button>').join('');
   wrap.querySelectorAll('.suggestion').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1241,6 +1317,7 @@ function renderBranchNav() {
   const wrap = document.getElementById('branchNav');
   wrap.innerHTML = BRANCHES.map(b => {
     const tasks = state.tasks[b.id] || [];
+    const energyMatch = getEnergyBranchIds().includes(b.id);
     const active = state.selected === b.id;
     return '<button class="branch-pill ' + (active ? 'active' : '') + ' ' + (tasks.length ? 'has-tasks' : '') + '" data-id="' + b.id + '">' +
       '<span class="dot"></span>' +
@@ -1306,38 +1383,93 @@ function renderComposition() {
   }
 }
 
+
+function addInboxTask() {
+  const input = document.getElementById('inboxInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (!state.tasks.inbox) state.tasks.inbox = [];
+  state.tasks.inbox.unshift({
+    id: 't' + Date.now() + Math.random().toString(36).slice(2,5),
+    text: text,
+    energy: 'mid',
+    done: false,
+    date: ''
+  });
+
+  input.value = '';
+  saveState();
+  renderAll();
+}
+
+function assignInboxTask(taskId, targetBranch) {
+  if (!state.tasks.inbox || !state.tasks[targetBranch]) return;
+  const idx = state.tasks.inbox.findIndex(t => t.id === taskId);
+  if (idx === -1) return;
+
+  const [task] = state.tasks.inbox.splice(idx, 1);
+  state.tasks[targetBranch].push(task);
+  saveState();
+  renderAll();
+}
+
+function canAssignInboxNow() {
+  const current = getCurrentEnergyBlock();
+  return current && current.branches.includes('inbox');
+}
+
+
 function renderTasks() {
   const list = document.getElementById('taskList');
   const addRow = document.getElementById('addRow');
   const label = document.getElementById('tasksLabel');
 
-  if (!state.selected) {
-    list.innerHTML = '<div class="empty">Pick a branch above to start adding tasks.</div>';
+  autoSelectEnergyBranch();
+
+  const branchIds = getEnergyBranchIds();
+  const primaryId = getPrimaryEnergyBranchId();
+  const branch = BRANCHES.find(b => b.id === primaryId) || BRANCHES.find(b => b.id === state.selected);
+
+  if (!branch) {
+    list.innerHTML = '<div class="empty">Buffer time. Use this for breaks, lunch, cleanup, or unscheduled items.</div>';
     addRow.style.display = 'none';
-    label.textContent = 'Tasks';
+    label.textContent = 'Now';
     return;
   }
 
-  const branch = BRANCHES.find(b => b.id === state.selected);
-  label.textContent = branch.label + ' Tasks';
+  label.textContent = 'Now: ' + branch.label;
   addRow.style.display = 'flex';
 
-  const tasks = state.tasks[branch.id] || [];
+  let tasks = [];
+  branchIds.forEach(id => {
+    const branchInfo = BRANCHES.find(b => b.id === id);
+    (state.tasks[id] || []).forEach(t => tasks.push({ ...t, branchId: id, branchLabel: branchInfo ? branchInfo.label : id }));
+  });
+
   if (tasks.length === 0) {
-    list.innerHTML = '<div class="empty">Empty. Add 1\u20133 small tasks you can finish this week.</div>';
+    list.innerHTML = '<div class="empty">No tasks match this energy block yet. Add one below and it will go into ' + escapeHtml(branch.label) + '.</div>';
     return;
   }
 
   list.innerHTML = tasks.map((t, i) =>
-    '<div class="task ' + (t.done ? 'done' : '') + '" data-id="' + t.id + '">' +
+    '<div class="task ' + (t.done ? 'done' : '') + '" data-id="' + t.id + '" data-branch="' + (t.branchId || branch.id) + '">' +
       '<span class="task-num">' + String(i+1).padStart(2,'0') + '</span>' +
       '<div class="energy" data-e="' + t.energy + '" data-act="energy" title="Tap to change energy"></div>' +
       '<div style="flex:1">' +
         '<div class="task-text" data-act="toggle">' + escapeHtml(t.text) + '</div>' +
         '<div class="task-tools">' +
-          '<span class="task-branch-date">Due</span>' +
+          '<span class="task-branch-date">' + escapeHtml(t.branchLabel || branch.label) + '</span>' + '<span class="task-branch-date">Due</span>' +
           '<input class="date-input" type="date" value="' + (t.date || '') + '" data-act="date" />' +
         '</div>' +
+        ((t.branchId === 'inbox' && canAssignInboxNow()) ? '<div class="assign-row">' +
+          '<button class="assign-btn" data-act="assign" data-target="technical">Technical</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="coordination">Coordination</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="processing">Processing</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="practice">Practice</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="life">Life</button>' +
+        '</div>' : '') +
       '</div>' +
       '<button class="task-del" data-act="del" aria-label="delete">\u00d7</button>' +
     '</div>'
@@ -1345,17 +1477,23 @@ function renderTasks() {
 
   list.querySelectorAll('.task').forEach(el => {
     const id = el.dataset.id;
+    const branchId = el.dataset.branch;
     el.querySelectorAll('[data-act]').forEach(btn => {
       if (btn.dataset.act === 'date') {
         btn.addEventListener('change', (e) => {
           e.stopPropagation();
-          handleTaskDate(id, e.target.value);
+          handleTaskDate(id, e.target.value, branchId);
         });
         btn.addEventListener('click', (e) => e.stopPropagation());
+      } else if (btn.dataset.act === 'assign') {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          assignInboxTask(id, btn.dataset.target);
+        });
       } else {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          handleTaskAction(id, btn.dataset.act);
+          handleTaskAction(id, btn.dataset.act, branchId);
         });
       }
     });
@@ -1363,8 +1501,8 @@ function renderTasks() {
 }
 
 
-function handleTaskDate(taskId, value) {
-  const tasks = state.tasks[state.selected];
+function handleTaskDate(taskId, value, branchId) {
+  const tasks = state.tasks[branchId || state.selected];
   const idx = tasks.findIndex(t => t.id === taskId);
   if (idx === -1) return;
   tasks[idx].date = value;
@@ -1401,8 +1539,8 @@ const ENERGY_SCHEDULE = [
     time: '6:00 AM – 8:00 AM',
     start: 6,
     end: 8,
-    branches: ['body', 'life'],
-    desc: 'Workout, stretch, family rhythm, personal reset.'
+    branches: ['life'],
+    desc: 'Family rhythm, personal reset, home/life setup.'
   },
   {
     id: 'morning-deep',
@@ -1437,8 +1575,8 @@ const ENERGY_SCHEDULE = [
     time: '3:30 PM – 4:30 PM',
     start: 15.5,
     end: 16.5,
-    branches: ['processing'],
-    desc: 'Download files, log RFIs/submittals, update trackers, file documents.'
+    branches: ['processing', 'inbox'],
+    desc: 'Download files, log RFIs/submittals, update trackers, file documents, and assign inbox tasks.'
   },
   {
     id: 'evening-life',
@@ -1446,8 +1584,8 @@ const ENERGY_SCHEDULE = [
     time: '5:00 PM – 8:00 PM',
     start: 17,
     end: 20,
-    branches: ['body', 'life'],
-    desc: 'Family, home, outdoor activity, workout, recovery.'
+    branches: ['life'],
+    desc: 'Family, home, errands, outdoor reset, recovery.'
   }
 ];
 
@@ -1459,6 +1597,24 @@ function getCurrentDecimalHour() {
 function getCurrentEnergyBlock() {
   const hour = getCurrentDecimalHour();
   return ENERGY_SCHEDULE.find(b => hour >= b.start && hour < b.end);
+}
+
+function getEnergyBranchIds() {
+  const current = getCurrentEnergyBlock();
+  return current ? current.branches : [];
+}
+
+function getPrimaryEnergyBranchId() {
+  const ids = getEnergyBranchIds();
+  return ids.length ? ids[0] : null;
+}
+
+function autoSelectEnergyBranch() {
+  const primary = getPrimaryEnergyBranchId();
+  if (primary && state.selected !== primary) {
+    state.selected = primary;
+    saveState();
+  }
 }
 
 function getBranchLabels(ids) {
@@ -1486,7 +1642,7 @@ function renderEnergyBoard() {
   }).join('');
 
   if (current) {
-    note.innerHTML = 'Right now: <strong>' + current.label + '</strong> — use the <strong>' + escapeHtml(getBranchLabels(current.branches)) + '</strong> branch.';
+    note.innerHTML = 'Right now: <strong>' + current.label + '</strong> — tasks on the right are automatically filtered to <strong>' + escapeHtml(getBranchLabels(current.branches)) + '</strong>.';
   } else {
     note.innerHTML = 'Right now: <strong>buffer / transition time</strong> — use this for breaks, lunch, cleanup, or unscheduled items.';
   }
@@ -1535,8 +1691,8 @@ function renderTimeline() {
 }
 
 
-function handleTaskAction(taskId, action) {
-  const tasks = state.tasks[state.selected];
+function handleTaskAction(taskId, action, branchId) {
+  const tasks = state.tasks[branchId || state.selected];
   const idx = tasks.findIndex(t => t.id === taskId);
   if (idx === -1) return;
   if (action === 'toggle') tasks[idx].done = !tasks[idx].done;
@@ -1551,8 +1707,9 @@ function handleTaskAction(taskId, action) {
 function addTask() {
   const input = document.getElementById('addInput');
   const text = input.value.trim();
-  if (!text || !state.selected) return;
-  state.tasks[state.selected].push({
+  const targetBranch = getPrimaryEnergyBranchId() || state.selected;
+  if (!text || !targetBranch) return;
+  state.tasks[targetBranch].push({
     id: 't' + Date.now() + Math.random().toString(36).slice(2,5),
     text: text, energy: 'mid', done: false, date: '',
   });
@@ -1685,6 +1842,7 @@ function renderNotes() {
 
 
 function renderAll() {
+  autoSelectEnergyBranch();
   renderBranchNav();
   renderComposition();
   renderTasks();
@@ -1711,6 +1869,11 @@ function init() {
   document.getElementById('noteSearch').addEventListener('input', renderNotes);
   document.getElementById('timelineFilter').addEventListener('change', renderTimeline);
 
+  document.getElementById('inboxBtn').addEventListener('click', addInboxTask);
+  document.getElementById('inboxInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addInboxTask();
+  });
+
   document.getElementById('addBtn').addEventListener('click', addTask);
   document.getElementById('addInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') addTask();
@@ -1729,7 +1892,7 @@ function init() {
   renderAll();
   renderChips();
   renderNotes();
-  setInterval(renderEnergyBoard, 60000);
+  setInterval(renderAll, 60000);
 }
 
 init();
