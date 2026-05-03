@@ -112,7 +112,7 @@
 
   .branch-nav {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.4rem;
     margin-bottom: 3rem;
   }
@@ -496,7 +496,7 @@
     }
 
     .dashboard-shell .branch-nav {
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
 
     .desktop-only-note {
@@ -1000,7 +1000,7 @@
     <div class="pager">
       <span id="pagerCur">01</span>
       <span class="pager-line"></span>
-      <span>06</span>
+      <span>04</span>
     </div>
   </div>
 
@@ -1031,7 +1031,7 @@
         <div>
           <div class="sec-head">
             <span class="sec-title">The Map</span>
-            <span class="sec-num"><strong>02</strong> &mdash; work + life branches</span>
+            <span class="sec-num"><strong>02</strong> &mdash; four energy branches</span>
           </div>
           <div class="rule"></div>
           <div class="branch-nav" id="branchNav"></div>
@@ -1039,16 +1039,16 @@
 
         <div class="anchor-area">
           <div class="sec-head">
-            <span class="sec-title">Quick Inbox</span>
-            <span class="sec-num"><strong>02</strong> &mdash; unassigned</span>
+            <span class="sec-title">Quick Add</span>
+            <span class="sec-num"><strong>02</strong> &mdash; fast capture</span>
           </div>
           <div class="rule"></div>
           <div class="add-row" style="display:flex">
             <span class="add-plus">+</span>
-            <input class="add-input" id="inboxInput" placeholder="Capture a task to sort later..." />
+            <input class="add-input" id="inboxInput" placeholder="Capture a quick task..." />
             <button class="add-go" id="inboxBtn">Add</button>
           </div>
-          <div class="inbox-capture-note">Use this for anything that pops up. Then sort it when you choose Processing.</div>
+          <div class="inbox-capture-note">Use this for anything that pops up. It will go into Admin Processing.</div>
         </div>
 
         <div class="today-area">
@@ -1150,22 +1150,17 @@
 
 <script>
 const BRANCHES = [
-  { id: 'inbox',        num: '01', label: 'Inbox' },
-  { id: 'technical',    num: '02', label: 'Technical' },
+  { id: 'life',         num: '01', label: 'Life / Body' },
+  { id: 'deep',         num: '02', label: 'Deep Work' },
   { id: 'coordination', num: '03', label: 'Coordination' },
-  { id: 'processing',   num: '04', label: 'Processing' },
-  { id: 'practice',     num: '05', label: 'Practice' },
-  { id: 'life',         num: '06', label: 'Life' },
+  { id: 'admin',        num: '04', label: 'Admin Processing' },
 ];
 
 const BRANCH_HINTS = {
-  inbox: 'Quick capture: unassigned tasks you can sort later during processing.',
-  technical: 'Deep review work: RFIs, submittals, code, details, drawings.',
-  coordination: 'Move the project: emails, meetings, consultant follow-ups, client decisions.',
-  processing: 'Low-energy admin: logging, downloading, filing, trackers, uploads.',
-  practice: 'Build fiber + form: proposals, contracts, invoicing, brand, systems.',
-  body: 'Energy maintenance: workout, stretch, walk, outdoor activity.',
-  life: 'Personal: family, home, errands, reset.'
+  life: 'Life, body, health, family, home, personal reset.',
+  deep: 'Deep focus work: RFIs, submittals, code, details, drawings.',
+  coordination: 'Communication work: emails, meetings, consultant follow-ups, client decisions.',
+  admin: 'Admin processing: logging, downloading, filing, trackers, uploads.'
 };
 
 
@@ -1173,8 +1168,13 @@ const ENERGY_CYCLE = ['mid', 'deep', 'easy'];
 
 
 const TASK_SUGGESTIONS = {
-  inbox: ['New task to sort', 'Follow-up to categorize', 'Random item from today', 'Needs review later'],
-  technical: [
+  life: [
+    'Workout / stretch',
+    'Family time',
+    'Home task',
+    'Personal reset'
+  ],
+  deep: [
     'Review RFI response',
     'Review submittal',
     'Check detail against drawings',
@@ -1186,44 +1186,30 @@ const TASK_SUGGESTIONS = {
     'Prep meeting agenda',
     'Send client update'
   ],
-  processing: [
+  admin: [
     'Download RFIs/submittals',
     'Log items in tracker',
     'File contractor documents',
     'Update submittal status'
-  ],
-  practice: [
-    'Work on proposal',
-    'Send invoice',
-    'Update template',
-    'Brand / website task'
-  ],
-  life: [
-    'Family time',
-    'Home task',
-    'Errand',
-    'Weekly reset'
   ]
 };
 
 function migrateOldBranches() {
-  if (state.migratedCustomBranches) return;
+  if (state.migratedFourBranches) return;
 
-  const oldProjects = state.tasks.projects || [];
-  const oldAdmin = state.tasks.admin || [];
-  const oldMeetings = state.tasks.meetings || [];
-  const oldLearning = state.tasks.learning || [];
-  const oldPersonal = state.tasks.personal || [];
-  const oldClarity = state.tasks.clarity || [];
+  const moveTasks = (from, to) => {
+    if (!state.tasks[from] || !state.tasks[from].length) return;
+    if (!state.tasks[to]) state.tasks[to] = [];
+    state.tasks[to] = [...state.tasks[to], ...state.tasks[from]];
+  };
 
-  if (oldProjects.length) state.tasks.technical = [...(state.tasks.technical || []), ...oldProjects];
-  if (oldAdmin.length) state.tasks.processing = [...(state.tasks.processing || []), ...oldAdmin];
-  if (oldMeetings.length) state.tasks.coordination = [...(state.tasks.coordination || []), ...oldMeetings];
-  if (oldLearning.length) state.tasks.technical = [...(state.tasks.technical || []), ...oldLearning];
-  if (oldPersonal.length) state.tasks.life = [...(state.tasks.life || []), ...oldPersonal];
-  if (oldClarity.length) state.tasks.practice = [...(state.tasks.practice || []), ...oldClarity];
+  moveTasks('inbox', 'admin');
+  moveTasks('technical', 'deep');
+  moveTasks('processing', 'admin');
+  moveTasks('practice', 'admin');
+  moveTasks('body', 'life');
 
-  state.migratedCustomBranches = true;
+  state.migratedFourBranches = true;
   saveState();
 }
 
@@ -1347,10 +1333,10 @@ function renderTasks() {
           '<input class="date-input" type="date" value="' + (t.date || '') + '" data-act="date" />' +
         '</div>' +
         ((state.selected === 'inbox') ? '<div class="assign-row">' +
-          '<button class="assign-btn" data-act="assign" data-target="technical">Technical</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="deep">Deep Work</button>' +
           '<button class="assign-btn" data-act="assign" data-target="coordination">Coordination</button>' +
-          '<button class="assign-btn" data-act="assign" data-target="processing">Processing</button>' +
-          '<button class="assign-btn" data-act="assign" data-target="practice">Practice</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="admin">Admin Processing</button>' +
+          '<button class="assign-btn" data-act="assign" data-target="admin">Admin Processing</button>' +
           '<button class="assign-btn" data-act="assign" data-target="life">Life</button>' +
         '</div>' : '') +
       '</div>' +
@@ -1430,7 +1416,7 @@ const ENERGY_SCHEDULE = [
     time: '8:00 AM – 12:00 PM',
     start: 8,
     end: 12,
-    branches: ['technical'],
+    branches: ['deep'],
     desc: 'RFI reviews, submittals, code decisions, drawings, details.'
   },
   {
@@ -1448,7 +1434,7 @@ const ENERGY_SCHEDULE = [
     time: '2:00 PM – 3:30 PM',
     start: 14,
     end: 15.5,
-    branches: ['technical'],
+    branches: ['deep'],
     desc: 'Second focus block for technical review and decisions.'
   },
   {
@@ -1457,7 +1443,7 @@ const ENERGY_SCHEDULE = [
     time: '3:30 PM – 4:30 PM',
     start: 15.5,
     end: 16.5,
-    branches: ['processing', 'inbox'],
+    branches: ['admin'],
     desc: 'Download files, log RFIs/submittals, update trackers, file documents, and sort inbox tasks.'
   },
   {
@@ -1525,8 +1511,8 @@ function addInboxTask() {
   const text = input.value.trim();
   if (!text) return;
 
-  if (!state.tasks.inbox) state.tasks.inbox = [];
-  state.tasks.inbox.unshift({
+  if (!state.tasks.admin) state.tasks.admin = [];
+  state.tasks.admin.unshift({
     id: 't' + Date.now() + Math.random().toString(36).slice(2,5),
     text: text,
     energy: 'mid',
@@ -1787,7 +1773,7 @@ function init() {
     renderChips();
   });
 
-  if (!state.selected) state.selected = 'inbox';
+  if (!state.selected) state.selected = 'life';
   renderAll();
   renderChips();
   renderNotes();
