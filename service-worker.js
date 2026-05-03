@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weekly-map-refined-bubbles-v1';
+const CACHE_NAME = 'weekly-map-energy-board-v1';
 const ASSETS = [
   './',
   './index.html',

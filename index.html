@@ -563,6 +563,69 @@
     color: white;
   }
 
+
+  /* ENERGY BOARD */
+  .energy-board {
+    margin-bottom: 2.4rem;
+  }
+
+  .energy-grid {
+    display: grid;
+    gap: .65rem;
+  }
+
+  .energy-block {
+    border: 1px solid var(--line);
+    padding: .9rem 1rem;
+    border-radius: 14px;
+    background: rgba(241,237,226,.38);
+    transition: all .2s ease;
+  }
+
+  .energy-block.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .energy-time {
+    font-size: .62rem;
+    color: var(--muted);
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    margin-bottom: .35rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .energy-block.active .energy-time {
+    color: var(--accent);
+  }
+
+  .energy-title {
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: .25rem;
+  }
+
+  .energy-desc {
+    font-size: .82rem;
+    line-height: 1.35;
+    opacity: .82;
+  }
+
+  .energy-now {
+    margin-top: .9rem;
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .energy-now strong {
+    color: var(--accent);
+  }
+
   /* TIMELINE */
   .timeline-wrap {
     margin-bottom: 2.4rem;
@@ -963,10 +1026,20 @@
           </div>
         </div>
 
+        <div class="energy-board">
+          <div class="sec-head">
+            <span class="sec-title">Energy Board</span>
+            <span class="sec-num"><strong>05</strong> &mdash; work by energy</span>
+          </div>
+          <div class="rule"></div>
+          <div class="energy-grid" id="energyGrid"></div>
+          <div class="energy-now" id="energyNow"></div>
+        </div>
+
         <div class="timeline-wrap">
           <div class="sec-head">
             <span class="sec-title">Timeline</span>
-            <span class="sec-num"><strong>05</strong> &mdash; dated tasks</span>
+            <span class="sec-num"><strong>06</strong> &mdash; dated tasks</span>
           </div>
           <div class="rule"></div>
           <div class="timeline-toolbar">
@@ -1320,6 +1393,106 @@ function getAllScheduledTasks() {
   });
 }
 
+
+const ENERGY_SCHEDULE = [
+  {
+    id: 'early-life',
+    label: 'Life / Body',
+    time: '6:00 AM – 8:00 AM',
+    start: 6,
+    end: 8,
+    branches: ['body', 'life'],
+    desc: 'Workout, stretch, family rhythm, personal reset.'
+  },
+  {
+    id: 'morning-deep',
+    label: 'Deep Work',
+    time: '8:00 AM – 12:00 PM',
+    start: 8,
+    end: 12,
+    branches: ['technical'],
+    desc: 'RFI reviews, submittals, code decisions, drawings, details.'
+  },
+  {
+    id: 'coordination',
+    label: 'Coordination',
+    time: '1:00 PM – 2:00 PM',
+    start: 13,
+    end: 14,
+    branches: ['coordination'],
+    desc: 'Emails, consultant follow-ups, meetings, client/contractor communication.'
+  },
+  {
+    id: 'afternoon-deep',
+    label: 'Deep Work',
+    time: '2:00 PM – 3:30 PM',
+    start: 14,
+    end: 15.5,
+    branches: ['technical'],
+    desc: 'Second focus block for technical review and decisions.'
+  },
+  {
+    id: 'processing',
+    label: 'Admin Processing',
+    time: '3:30 PM – 4:30 PM',
+    start: 15.5,
+    end: 16.5,
+    branches: ['processing'],
+    desc: 'Download files, log RFIs/submittals, update trackers, file documents.'
+  },
+  {
+    id: 'evening-life',
+    label: 'Life / Body',
+    time: '5:00 PM – 8:00 PM',
+    start: 17,
+    end: 20,
+    branches: ['body', 'life'],
+    desc: 'Family, home, outdoor activity, workout, recovery.'
+  }
+];
+
+function getCurrentDecimalHour() {
+  const now = new Date();
+  return now.getHours() + now.getMinutes() / 60;
+}
+
+function getCurrentEnergyBlock() {
+  const hour = getCurrentDecimalHour();
+  return ENERGY_SCHEDULE.find(b => hour >= b.start && hour < b.end);
+}
+
+function getBranchLabels(ids) {
+  return ids.map(id => {
+    const branch = BRANCHES.find(b => b.id === id);
+    return branch ? branch.label : id;
+  }).join(' + ');
+}
+
+function renderEnergyBoard() {
+  const grid = document.getElementById('energyGrid');
+  const note = document.getElementById('energyNow');
+  if (!grid || !note) return;
+
+  const current = getCurrentEnergyBlock();
+
+  grid.innerHTML = ENERGY_SCHEDULE.map(block => {
+    const active = current && current.id === block.id;
+    return '<div class="energy-block ' + (active ? 'active' : '') + '">' +
+      '<div class="energy-time">' + block.time + '</div>' +
+      '<div class="energy-title">' + block.label + '</div>' +
+      '<div class="energy-desc">' + block.desc + '</div>' +
+      '<div class="energy-desc" style="margin-top:.35rem">Branches: ' + escapeHtml(getBranchLabels(block.branches)) + '</div>' +
+    '</div>';
+  }).join('');
+
+  if (current) {
+    note.innerHTML = 'Right now: <strong>' + current.label + '</strong> — use the <strong>' + escapeHtml(getBranchLabels(current.branches)) + '</strong> branch.';
+  } else {
+    note.innerHTML = 'Right now: <strong>buffer / transition time</strong> — use this for breaks, lunch, cleanup, or unscheduled items.';
+  }
+}
+
+
 function renderTimeline() {
   const wrap = document.getElementById('timelineList');
   if (!wrap) return;
@@ -1516,6 +1689,7 @@ function renderAll() {
   renderComposition();
   renderTasks();
   renderSuggestions();
+  renderEnergyBoard();
   renderTimeline();
   applyVisualSettings();
 }
@@ -1555,6 +1729,7 @@ function init() {
   renderAll();
   renderChips();
   renderNotes();
+  setInterval(renderEnergyBoard, 60000);
 }
 
 init();
