@@ -166,33 +166,44 @@
   .circle {
     position: absolute;
     border-radius: 50%;
-    display: flex; flex-direction: column;
-    padding: 2.4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(2rem, 4vw, 3.2rem);
+    overflow: hidden;
   }
 
   .circle-black {
-    background: var(--ink);
+    background: rgba(14, 14, 12, 0.92);
     color: var(--paper);
-    width: 65%; aspect-ratio: 1;
-    top: 0; left: 0;
-    z-index: 2;
-    justify-content: flex-start;
+    width: 65%;
+    aspect-ratio: 1;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
   .circle-white {
-    width: 70%; aspect-ratio: 1;
-    bottom: 0; right: 0;
-    z-index: 1;
+    width: 70%;
+    aspect-ratio: 1;
+    top: 26%;
+    left: 31%;
+    z-index: 3;
     background:
-      radial-gradient(circle at 78% 28%, #fdfaf0 0%, transparent 38%),
-      radial-gradient(circle at 30% 75%, #d8d0bb 0%, transparent 55%),
-      linear-gradient(140deg, #f4efe1 0%, #cdc4ad 100%);
+      radial-gradient(circle at 78% 28%, rgba(253,250,240,0.82) 0%, transparent 38%),
+      radial-gradient(circle at 30% 75%, rgba(216,208,187,0.70) 0%, transparent 55%),
+      linear-gradient(140deg, rgba(244,239,225,0.82) 0%, rgba(205,196,173,0.72) 100%);
     box-shadow:
-      0 30px 60px -25px rgba(20,18,14,0.35),
-      0 8px 20px -10px rgba(20,18,14,0.15);
+      0 30px 60px -25px rgba(20,18,14,0.28),
+      0 8px 20px -10px rgba(20,18,14,0.14);
     color: var(--ink);
-    justify-content: flex-end;
-    padding: 2rem 2rem 2.4rem;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   .circle-label {
@@ -207,11 +218,12 @@
   .circle-black .circle-label { color: var(--accent); }
 
   .circle-headline {
-    font-size: 1.05rem;
-    line-height: 1.32;
+    font-size: clamp(1rem, 1.35vw, 1.2rem);
+    line-height: 1.42;
     font-weight: 400;
     font-variation-settings: 'opsz' 18, 'wdth' 92;
     letter-spacing: -0.005em;
+    max-width: 24ch;
   }
 
   .circle-headline strong { font-weight: 700; }
@@ -219,8 +231,8 @@
   .circle-meta {
     font-size: 0.7rem;
     letter-spacing: 0.04em;
-    margin-top: auto;
-    padding-top: 0.8rem;
+    margin-top: 1.2rem;
+    padding-top: 0;
     opacity: 0.7;
     font-variant-numeric: tabular-nums;
   }
@@ -406,14 +418,16 @@
 
   .wide-composition .circle-black {
     width: min(58%, 520px);
-    top: 7%;
-    left: 4%;
+    top: 12%;
+    left: 8%;
   }
 
   .wide-composition .circle-white {
     width: min(62%, 560px);
-    right: 4%;
-    bottom: 5%;
+    top: 28%;
+    left: 32%;
+    right: auto;
+    bottom: auto;
   }
 
   .dashboard-heading {
@@ -521,6 +535,33 @@
   .view { display: none; }
   .view.active { display: block; }
 
+
+
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin: .8rem 0 1rem;
+  }
+
+  .suggestion {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: .65rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .45rem .65rem;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .suggestion:active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
 
   /* TIMELINE */
   .timeline-wrap {
@@ -636,6 +677,31 @@
     color: var(--muted);
     letter-spacing: .08em;
     text-transform: uppercase;
+  }
+
+
+  @media (max-width: 700px) {
+    .wide-composition .circle-black {
+      width: 70%;
+      top: 8%;
+      left: 2%;
+    }
+
+    .wide-composition .circle-white {
+      width: 72%;
+      top: 31%;
+      left: 24%;
+    }
+
+    .circle {
+      padding: 1.65rem;
+    }
+
+    .circle-headline {
+      font-size: .92rem;
+      line-height: 1.34;
+      max-width: 20ch;
+    }
   }
 
   @media (max-width: 430px) {
@@ -785,40 +851,6 @@
 
   .note-search::placeholder { color: var(--muted); }
 
-  .style-panel {
-    position: fixed;
-    left: 1rem;
-    right: 1rem;
-    bottom: 1rem;
-    max-width: 720px;
-    margin: 0 auto;
-    background: rgba(241,237,226,.92);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--line);
-    padding: .7rem;
-    border-radius: 16px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: .45rem;
-    z-index: 99;
-  }
-
-  .style-panel button {
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--ink);
-    font-family: inherit;
-    font-size: .68rem;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: .55rem .4rem;
-    border-radius: 999px;
-  }
-
-  .style-panel button:active {
-    background: var(--ink);
-    color: var(--paper);
-  }
 
   @media (max-width: 430px) {
     body { padding-inline: 1rem; }
@@ -869,13 +901,13 @@
             <span class="sec-num"><strong>01</strong> &mdash; what matters most</span>
           </div>
           <div class="rule"></div>
-          <textarea class="anchor-input" id="anchorInput" rows="3" placeholder="Ship the proposal. Or: be present with family."></textarea>
+          <textarea class="anchor-input" id="anchorInput" rows="3" placeholder="Finish the technical decisions. Or: clear the admin backlog."></textarea>
         </div>
 
         <div>
           <div class="sec-head">
             <span class="sec-title">The Map</span>
-            <span class="sec-num"><strong>02</strong> &mdash; six branches</span>
+            <span class="sec-num"><strong>02</strong> &mdash; work + life branches</span>
           </div>
           <div class="rule"></div>
           <div class="branch-nav" id="branchNav"></div>
@@ -917,6 +949,7 @@
             <span class="sec-num"><strong>03</strong> &mdash; small &amp; finishable</span>
           </div>
           <div class="rule"></div>
+          <div class="suggestions" id="taskSuggestions"></div>
           <div class="task-list" id="taskList"></div>
           <div class="add-row" id="addRow" style="display:none">
             <span class="add-plus">+</span>
@@ -986,24 +1019,109 @@
 
 </div>
 
-<div class="style-panel" aria-label="easy visual controls">
-  <button onclick="setCircleSize('small')">Small</button>
-  <button onclick="setCircleSize('default')">Default</button>
-  <button onclick="setCircleSize('large')">Large</button>
-  <button onclick="toggleHeadline()">Headline</button>
-</div>
-
 <script>
 const BRANCHES = [
-  { id: 'projects',  num: '01', label: 'Projects' },
-  { id: 'practice',  num: '02', label: 'Practice' },
-  { id: 'technical', num: '03', label: 'Technical' },
-  { id: 'body',      num: '04', label: 'Body' },
-  { id: 'life',      num: '05', label: 'Life' },
-  { id: 'clarity',   num: '06', label: 'Clarity' },
+  { id: 'technical',    num: '01', label: 'Technical' },
+  { id: 'coordination', num: '02', label: 'Coordination' },
+  { id: 'processing',   num: '03', label: 'Processing' },
+  { id: 'practice',     num: '04', label: 'Practice' },
+  { id: 'body',         num: '05', label: 'Body' },
+  { id: 'life',         num: '06', label: 'Life' },
 ];
 
+const BRANCH_HINTS = {
+  technical: 'Deep review work: RFIs, submittals, code, details, drawings.',
+  coordination: 'Move the project: emails, meetings, consultant follow-ups, client decisions.',
+  processing: 'Low-energy admin: logging, downloading, filing, trackers, uploads.',
+  practice: 'Build fiber + form: proposals, contracts, invoicing, brand, systems.',
+  body: 'Energy maintenance: workout, stretch, walk, outdoor activity.',
+  life: 'Personal: family, home, errands, reset.'
+};
+
+
 const ENERGY_CYCLE = ['mid', 'deep', 'easy'];
+
+
+const TASK_SUGGESTIONS = {
+  technical: [
+    'Review RFI response',
+    'Review submittal',
+    'Check detail against drawings',
+    'Verify code issue'
+  ],
+  coordination: [
+    'Follow up with consultant',
+    'Email contractor clarification',
+    'Prep meeting agenda',
+    'Send client update'
+  ],
+  processing: [
+    'Download RFIs/submittals',
+    'Log items in tracker',
+    'File contractor documents',
+    'Update submittal status'
+  ],
+  practice: [
+    'Work on proposal',
+    'Send invoice',
+    'Update template',
+    'Brand / website task'
+  ],
+  body: [
+    '30 min workout',
+    'Stretch 10 min',
+    'Walk outside',
+    'Mobility reset'
+  ],
+  life: [
+    'Family time',
+    'Home task',
+    'Errand',
+    'Weekly reset'
+  ]
+};
+
+function migrateOldBranches() {
+  if (state.migratedCustomBranches) return;
+
+  const oldProjects = state.tasks.projects || [];
+  const oldAdmin = state.tasks.admin || [];
+  const oldMeetings = state.tasks.meetings || [];
+  const oldLearning = state.tasks.learning || [];
+  const oldPersonal = state.tasks.personal || [];
+  const oldClarity = state.tasks.clarity || [];
+
+  if (oldProjects.length) state.tasks.technical = [...(state.tasks.technical || []), ...oldProjects];
+  if (oldAdmin.length) state.tasks.processing = [...(state.tasks.processing || []), ...oldAdmin];
+  if (oldMeetings.length) state.tasks.coordination = [...(state.tasks.coordination || []), ...oldMeetings];
+  if (oldLearning.length) state.tasks.technical = [...(state.tasks.technical || []), ...oldLearning];
+  if (oldPersonal.length) state.tasks.life = [...(state.tasks.life || []), ...oldPersonal];
+  if (oldClarity.length) state.tasks.practice = [...(state.tasks.practice || []), ...oldClarity];
+
+  state.migratedCustomBranches = true;
+  saveState();
+}
+
+function renderSuggestions() {
+  const wrap = document.getElementById('taskSuggestions');
+  if (!wrap) return;
+
+  if (!state.selected) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  const suggestions = TASK_SUGGESTIONS[state.selected] || [];
+  wrap.innerHTML = suggestions.map(s => '<button class="suggestion" type="button">' + escapeHtml(s) + '</button>').join('');
+  wrap.querySelectorAll('.suggestion').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('addInput').value = btn.textContent;
+      document.getElementById('addInput').focus();
+    });
+  });
+}
+
+
 
 let state = {
   anchor: '',
@@ -1011,9 +1129,7 @@ let state = {
   selected: null,
   focus: [],
   notes: [],
-  editingNoteId: null,
-  circleSize: 'default',
-  showHeadline: true
+  editingNoteId: null
 };
 BRANCHES.forEach(b => state.tasks[b.id] = []);
 
@@ -1045,34 +1161,7 @@ function setWeekDate() {
 }
 
 function applyVisualSettings() {
-  const black = document.querySelector('.circle-black');
-  const white = document.querySelector('.circle-white');
-  const display = document.querySelector('.display');
-
-  if (state.circleSize === 'small') {
-    black.style.width = '58%';
-    white.style.width = '62%';
-  } else if (state.circleSize === 'large') {
-    black.style.width = '72%';
-    white.style.width = '76%';
-  } else {
-    black.style.width = '65%';
-    white.style.width = '70%';
-  }
-
-  display.style.display = state.showHeadline ? 'block' : 'none';
-}
-
-function setCircleSize(size) {
-  state.circleSize = size;
-  saveState();
-  applyVisualSettings();
-}
-
-function toggleHeadline() {
-  state.showHeadline = !state.showHeadline;
-  saveState();
-  applyVisualSettings();
+  // Visual settings are fixed in this refined version.
 }
 
 function renderBranchNav() {
@@ -1125,7 +1214,7 @@ function renderComposition() {
   } else {
     blackMsg = open.length + ' ' + (open.length === 1 ? 'task' : 'tasks') + ' on your plate this week.';
   }
-  blackHead.innerHTML = '<strong>' + branch.label + '</strong> &mdash; ' + blackMsg;
+  blackHead.innerHTML = '<strong>' + branch.label + '</strong> &mdash; ' + blackMsg + '<br><br><span style="opacity:.72">' + escapeHtml(BRANCH_HINTS[branch.id] || '') + '</span>';
   blackMeta.textContent = 'Branch ' + branch.num + ' / 06';
 
   if (tasks.length === 0) {
@@ -1426,6 +1515,7 @@ function renderAll() {
   renderBranchNav();
   renderComposition();
   renderTasks();
+  renderSuggestions();
   renderTimeline();
   applyVisualSettings();
 }
@@ -1433,6 +1523,7 @@ function renderAll() {
 function init() {
   setWeekDate();
   loadState();
+  migrateOldBranches();
 
   document.getElementById('anchorInput').value = state.anchor || '';
   document.getElementById('anchorInput').addEventListener('input', (e) => {
@@ -1453,7 +1544,7 @@ function init() {
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     if (!confirm('Clear everything and start fresh?')) return;
-    state = { anchor: '', tasks: {}, selected: null, focus: [], notes: [], editingNoteId: null, circleSize: 'default', showHeadline: true };
+    state = { anchor: '', tasks: {}, selected: null, focus: [], notes: [], editingNoteId: null };
     BRANCHES.forEach(b => state.tasks[b.id] = []);
     document.getElementById('anchorInput').value = '';
     saveState();
